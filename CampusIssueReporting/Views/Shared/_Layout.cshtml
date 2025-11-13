@@ -1,0 +1,88 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>@ViewData["Title"] - CampusIssueReporting</title>
+
+  <!-- Bootstrap CSS (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- Optional: local css -->
+  <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+      <a class="navbar-brand" asp-controller="Home" asp-action="Index">CampusApp</a>
+
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Home</a></li>
+          @if (SignInManager.IsSignedIn(User) && User.IsInRole("Student"))
+          {
+              <li class="nav-item"><a class="nav-link" asp-controller="Issue" asp-action="MyIssues">My Issues</a></li>
+              <li class="nav-item"><a class="nav-link" asp-controller="Issue" asp-action="NewIssue">create new issue</a></li>
+
+          }
+          @if (User.IsInRole("Admin"))
+          {
+              <li class="nav-item"><a class="nav-link" href="/Admin/Account/AdminDashboard">Admin</a></li>
+          }
+        </ul>
+
+        <ul class="navbar-nav">
+          @if (SignInManager.IsSignedIn(User))
+          {
+              <li class="nav-item">
+                <a class="nav-link"> @UserManager.GetUserName(User)</a>
+              </li>
+              <li class="nav-item">
+                <form class="form-inline" asp-controller="Account" asp-action="Logout" method="post">
+                  <button type="submit" class="btn btn-link nav-link">Logout</button>
+                </form>
+              </li>
+          }
+          else
+          {
+              <li class="nav-item"><a class="nav-link" asp-controller="Account" asp-action="Login">Student Login</a></li>
+          }
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    @if (TempData["Success"] != null) {
+      <div class="alert alert-success">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null) {
+      <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    @RenderBody()
+  </div>
+
+  <footer class="border-top text-muted mt-4">
+    <div class="container py-3">© @DateTime.UtcNow.Year CampusIssueReporting</div>
+  </footer>
+
+  <!-- jQuery (CDN) -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- Bootstrap JS (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- jQuery Validate & Unobtrusive (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.12/dist/jquery.validate.unobtrusive.min.js"></script>
+
+  <!-- optional local scripts -->
+  <script src="~/js/site.js"></script>
+
+  @RenderSection("Scripts", required: false)
+</body>
+</html>

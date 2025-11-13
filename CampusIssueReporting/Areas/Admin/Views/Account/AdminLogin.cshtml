@@ -1,0 +1,38 @@
+@model CampusIssueReporting.ViewModel.LoginViewModel
+@{
+    ViewData["Title"] = "Admin Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+<form asp-action="AdminLogin" method="post" novalidate>
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label for="Email" class="form-label">Email</label>
+        <input type="email" id="Email" name="Email" class="form-control" required />
+        <span class="text-danger" id="Email-error"></span>
+    </div>
+
+    <div class="mb-3">
+        <label for="Password" class="form-label">Password</label>
+        <input type="password" id="Password" name="Password" class="form-control" required />
+        <span class="text-danger" id="Password-error"></span>
+    </div>
+
+    <div class="form-check mb-3">
+        <input type="checkbox" id="RememberMe" name="RememberMe" class="form-check-input" />
+        <label for="RememberMe" class="form-check-label">Remember Me</label>
+    </div>
+
+    <div class="d-grid">
+        <button type="submit" class="btn btn-primary">Login</button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

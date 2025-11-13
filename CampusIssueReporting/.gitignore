@@ -1,0 +1,21 @@
+# ASP.NET Core
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.dbmdl
+*.pdb
+*.cache
+*.log
+*.vs/
+.vscode/
+../project.sln
+
+# Configuration
+appsettings.Development.json
+appsettings.*.json
+secrets.json
+.env
+.env.*

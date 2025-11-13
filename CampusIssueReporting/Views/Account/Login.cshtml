@@ -1,0 +1,29 @@
+@model CampusIssueReporting.ViewModel.LoginViewModel
+@{
+    ViewData["Title"] = "Student Login";
+}
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="Login" method="post" novalidate>
+    @Html.AntiForgeryToken()
+    <div class="mb-3">
+        <label for="Email" class="form-label">Email</label>
+        <input type="email" id="Email" name="Email" class="form-control" required />
+        <span class="text-danger" id="Email-error"></span>
+    </div>
+    <div class="mb-3">
+        <label for="Password" class="form-label">Password</label>
+        <input type="password" id="Password" name="Password" class="form-control" required />
+        <span class="text-danger" id="Password-error"></span>
+    </div>
+    <div class="form-check mb-3">
+        <input type="checkbox" id="RememberMe" name="RememberMe" class="form-check-input" />
+        <label for="RememberMe" class="form-check-label">Remember Me</label>
+    </div>
+    <button type="submit" class="btn btn-primary">Login</button>
+    <a asp-action="Register" class="btn btn-link">Register</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

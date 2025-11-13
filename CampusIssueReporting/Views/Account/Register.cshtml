@@ -1,0 +1,34 @@
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+}
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="Register" method="post" novalidate>
+    @Html.AntiForgeryToken()
+    <div class="mb-3">
+        <label for="FullName" class="form-label">Full Name</label>
+        <input type="text" id="FullName" name="FullName" class="form-control" required />
+        <span class="text-danger" id="FullName-error"></span>
+    </div>
+    <div class="mb-3">
+        <label for="Email" class="form-label">Email</label>
+        <input type="email" id="Email" name="Email" class="form-control" required />
+        <span class="text-danger" id="Email-error"></span>
+    </div>
+    <div class="mb-3">
+        <label for="Password" class="form-label">Password</label>
+        <input type="password" id="Password" name="Password" class="form-control" required />
+        <span class="text-danger" id="Password-error"></span>
+    </div>
+    <div class="mb-3">
+        <label for="ConfirmPassword" class="form-label">Confirm Password</label>
+        <input type="password" id="ConfirmPassword" name="ConfirmPassword" class="form-control" required />
+        <span class="text-danger" id="ConfirmPassword-error"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Register</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
