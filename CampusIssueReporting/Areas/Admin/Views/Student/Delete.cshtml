@@ -1,0 +1,35 @@
+@model CampusIssueReporting.Models.ApplicationUser
+@{
+    ViewData["Title"] = "Delete Student";
+    var isSelf = (bool?)ViewData["IsSelf"] ?? false;
+    var isAdminAccount = (bool?)ViewData["IsAdminAccount"] ?? false;
+}
+
+<h2>Delete Student</h2>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<div class="card mb-3">
+    <div class="card-body">
+        <p>Are you sure you want to delete the student account: <strong>@Model.UserName (@Model.Email)</strong>?</p>
+
+        @if (isSelf)
+        {
+            <div class="alert alert-warning">You cannot delete your own account.</div>
+        }
+
+        @if (isAdminAccount)
+        {
+            <div class="alert alert-danger">This account has Admin role and cannot be deleted here.</div>
+        }
+
+        <form asp-area="Admin" asp-action="Delete" method="post">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-danger" @(isSelf || isAdminAccount ? "disabled" : "")>Delete</button>
+            <a asp-area="Admin" asp-action="Index" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>

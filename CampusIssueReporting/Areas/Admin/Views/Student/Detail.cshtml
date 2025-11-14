@@ -1,0 +1,50 @@
+@model CampusIssueReporting.Models.ApplicationUser
+@{
+    ViewData["Title"] = "Student Details";
+    var roles = ViewData["Roles"] as System.Collections.Generic.IList<string> ?? new string[] { };
+}
+
+<h2>Student Details</h2>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">User name</dt>
+            <dd class="col-sm-9">@Model.UserName</dd>
+
+            <dt class="col-sm-3">Email</dt>
+            <dd class="col-sm-9">@Model.Email</dd>
+
+            <dt class="col-sm-3">Phone</dt>
+            <dd class="col-sm-9">@Model.PhoneNumber</dd>
+
+            <dt class="col-sm-3">Roles</dt>
+            <dd class="col-sm-9">@string.Join(", ", roles)</dd>
+
+            @* Optional fields *@
+            @if (Model is CampusIssueReporting.Models.ApplicationUser au && !string.IsNullOrWhiteSpace(au.FullName))
+            {
+                <dt class="col-sm-3">Full name</dt>
+                <dd class="col-sm-9">@au.FullName</dd>
+            }
+
+            <dt class="col-sm-3">Id</dt>
+            <dd class="col-sm-9">@Model.Id</dd>
+        </dl>
+
+        @* Optional: show reported issues *@
+        @if (Model is CampusIssueReporting.Models.ApplicationUser applicationUser && applicationUser.Issues != null && applicationUser.Issues.Any())
+        {
+            <h5>Reported issues</h5>
+            <ul>
+                @foreach (var issue in applicationUser.Issues)
+                {
+                    <li><a asp-area="Admin" asp-controller="Issue" asp-action="Details" asp-route-id="@issue.Id">@issue.Title</a></li>
+                }
+            </ul>
+        }
+
+        <a asp-area="Admin" asp-action="Index" class="btn btn-secondary">Back</a>
+        <a asp-area="Admin" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+    </div>
+</div>

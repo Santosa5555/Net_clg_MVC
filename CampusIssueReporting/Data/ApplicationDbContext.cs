@@ -13,7 +13,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Issue> Issues { get; set; } = null!;
     public DbSet<Comment> Comments { get; set; } = null!;
     public DbSet<FileRecord> FileRecords { get; set; } = null!;
-    public DbSet<AuditLog> AuditLogs { get; set; } = null!;
+    public DbSet<IssueCategory> IssueCategories { get; set; } = null!;
+    public DbSet<AuditLog> AuditLogs { get; set; } = null!; // not used for now
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -59,6 +60,12 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .WithMany(u => u.UploadedFiles)
             .HasForeignKey(f => f.UploadedById)
             .OnDelete(DeleteBehavior.Restrict);
+
+         builder.Entity<FileRecord>()
+            .HasOne(f => f.Issue)
+            .WithMany(i => i.Files)
+            .HasForeignKey(f => f.IssueId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 
 }

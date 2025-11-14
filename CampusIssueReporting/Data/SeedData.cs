@@ -1,7 +1,8 @@
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-namespace CampusIssueReporting.Models; 
+namespace CampusIssueReporting.Models;
+
 public static class SeedData
 {
     public static async Task InitializeAsync(IServiceProvider services)
@@ -20,7 +21,7 @@ public static class SeedData
             if (!await roleMgr.RoleExistsAsync(role))
                 await roleMgr.CreateAsync(new IdentityRole(role));
         }
-         // Admin user
+        // Admin user
         var adminEmail = "admin@gmail.com";
         var admin = await userManager.FindByEmailAsync(adminEmail);
         if (admin == null)
@@ -38,6 +39,17 @@ public static class SeedData
                 await userManager.AddToRoleAsync(admin, "Admin");
             }
         }
+        if (!context.IssueCategories.Any())
+        {
+            context.IssueCategories.AddRange(
+                new IssueCategory { Name = "Hostel" },
+                new IssueCategory { Name = "Lab" },
+                new IssueCategory { Name = "Classroom" },
+                new IssueCategory { Name = "Cafeteria" }
+            );
+            await context.SaveChangesAsync();
+        }
+
     }
 
 }

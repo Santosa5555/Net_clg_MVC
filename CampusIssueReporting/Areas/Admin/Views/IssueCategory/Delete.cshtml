@@ -1,0 +1,23 @@
+@model CampusIssueReporting.Models.IssueCategory
+@{
+    ViewData["Title"] = "Confirm Delete";
+}
+
+<h2>Delete Category</h2>
+
+<div class="alert alert-warning">
+    Are you sure you want to delete the category "<strong>@Model.Name</strong>"?
+</div>
+
+@if (Model.Issues != null && Model.Issues.Any())
+{
+    <div class="alert alert-danger">
+        This category has @Model.Issues.Count() associated issue(s). You must reassign or remove those issues before deleting.
+    </div>
+}
+
+<form asp-area="Admin" asp-action="Delete" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a asp-area="Admin" asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

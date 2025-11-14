@@ -22,7 +22,7 @@
 
       <div class="collapse navbar-collapse">
         <ul class="navbar-nav me-auto">
-          <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Home</a></li>
+          @* <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Home</a></li> *@
           @if (SignInManager.IsSignedIn(User) && User.IsInRole("Student"))
           {
               <li class="nav-item"><a class="nav-link" asp-controller="Issue" asp-action="MyIssues">My Issues</a></li>
@@ -31,7 +31,7 @@
           }
           @if (User.IsInRole("Admin"))
           {
-              <li class="nav-item"><a class="nav-link" href="/Admin/Account/AdminDashboard">Admin</a></li>
+              <li class="nav-item"><a class="nav-link" href="/Admin/Home/AdminDashboard">Admin</a></li>
           }
         </ul>
 

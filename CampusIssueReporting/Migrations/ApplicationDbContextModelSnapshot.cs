@@ -176,6 +176,9 @@ namespace CampusIssueReporting.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int?>("IssueId")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("UploadedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -184,6 +187,8 @@ namespace CampusIssueReporting.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("IssueId");
 
                     b.HasIndex("UploadedById");
 
@@ -211,6 +216,9 @@ namespace CampusIssueReporting.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("Priority")
+                        .HasColumnType("integer");
+
                     b.Property<string>("ReporterId")
                         .IsRequired()
                         .HasColumnType("text");
@@ -218,9 +226,8 @@ namespace CampusIssueReporting.Migrations
                     b.Property<DateTime?>("ResolvedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -254,7 +261,7 @@ namespace CampusIssueReporting.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("IssueCategory");
+                    b.ToTable("IssueCategories");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -410,11 +417,18 @@ namespace CampusIssueReporting.Migrations
 
             modelBuilder.Entity("CampusIssueReporting.Models.FileRecord", b =>
                 {
+                    b.HasOne("CampusIssueReporting.Models.Issue", "Issue")
+                        .WithMany("Files")
+                        .HasForeignKey("IssueId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("CampusIssueReporting.Models.ApplicationUser", "UploadedBy")
                         .WithMany("UploadedFiles")
                         .HasForeignKey("UploadedById")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Issue");
 
                     b.Navigation("UploadedBy");
                 });
@@ -507,6 +521,8 @@ namespace CampusIssueReporting.Migrations
             modelBuilder.Entity("CampusIssueReporting.Models.Issue", b =>
                 {
                     b.Navigation("Comments");
+
+                    b.Navigation("Files");
                 });
 
             modelBuilder.Entity("CampusIssueReporting.Models.IssueCategory", b =>

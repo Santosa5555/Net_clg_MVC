@@ -73,7 +73,7 @@ namespace CampusIssueReporting.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "IssueCategory",
+                name: "IssueCategories",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -82,7 +82,7 @@ namespace CampusIssueReporting.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_IssueCategory", x => x.Id);
+                    table.PrimaryKey("PK_IssueCategories", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -192,28 +192,6 @@ namespace CampusIssueReporting.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "FileRecords",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    FileName = table.Column<string>(type: "text", nullable: false),
-                    FilePath = table.Column<string>(type: "text", nullable: false),
-                    UploadedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UploadedById = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_FileRecords", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_FileRecords_AspNetUsers_UploadedById",
-                        column: x => x.UploadedById,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Issues",
                 columns: table => new
                 {
@@ -221,7 +199,8 @@ namespace CampusIssueReporting.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Title = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
-                    Status = table.Column<string>(type: "text", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    Priority = table.Column<int>(type: "integer", nullable: false),
                     ReporterId = table.Column<string>(type: "text", nullable: false),
                     AssignedAdminId = table.Column<string>(type: "text", nullable: true),
                     CategoryId = table.Column<int>(type: "integer", nullable: true),
@@ -245,9 +224,9 @@ namespace CampusIssueReporting.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Issues_IssueCategory_CategoryId",
+                        name: "FK_Issues_IssueCategories_CategoryId",
                         column: x => x.CategoryId,
-                        principalTable: "IssueCategory",
+                        principalTable: "IssueCategories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
                 });
@@ -274,6 +253,35 @@ namespace CampusIssueReporting.Migrations
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Comments_Issues_IssueId",
+                        column: x => x.IssueId,
+                        principalTable: "Issues",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "FileRecords",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    FileName = table.Column<string>(type: "text", nullable: false),
+                    FilePath = table.Column<string>(type: "text", nullable: false),
+                    UploadedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UploadedById = table.Column<string>(type: "text", nullable: false),
+                    IssueId = table.Column<int>(type: "integer", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FileRecords", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_FileRecords_AspNetUsers_UploadedById",
+                        column: x => x.UploadedById,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_FileRecords_Issues_IssueId",
                         column: x => x.IssueId,
                         principalTable: "Issues",
                         principalColumn: "Id",
@@ -326,6 +334,11 @@ namespace CampusIssueReporting.Migrations
                 name: "IX_Comments_UserId",
                 table: "Comments",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FileRecords_IssueId",
+                table: "FileRecords",
+                column: "IssueId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_FileRecords_UploadedById",
@@ -385,7 +398,7 @@ namespace CampusIssueReporting.Migrations
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "IssueCategory");
+                name: "IssueCategories");
         }
     }
 }

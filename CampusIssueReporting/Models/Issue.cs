@@ -13,8 +13,11 @@ namespace CampusIssueReporting.Models
         [Required]
         public string Description { get; set; } = string.Empty;
 
-        public string Status { get; set; } = "Pending";
+        [Required]
+        public IssueStatus Status { get; set; } = IssueStatus.Open;
 
+        [Required]
+        public IssuePriority Priority { get; set; } = IssuePriority.Medium;
         [Required]
         public string ReporterId { get; set; } = null!;
         public ApplicationUser Reporter { get; set; } = null!;
@@ -25,7 +28,7 @@ namespace CampusIssueReporting.Models
 
         public int? CategoryId { get; set; }
         public IssueCategory? Category { get; set; }
-
+        public ICollection<FileRecord> Files { get; set; } = new List<FileRecord>();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }

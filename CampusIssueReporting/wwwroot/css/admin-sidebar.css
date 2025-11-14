@@ -1,0 +1,6 @@
+a.sidebar{
+    cursor: pointer;
+}
+a.sidebar:hover {
+    background-color: #8799ac;
+}
