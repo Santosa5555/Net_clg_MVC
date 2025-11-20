@@ -28,7 +28,7 @@ public static class RedirectHelper
             return controller.RedirectToAction("AdminDashboard", "Account", new { area = "Admin" });
 
         if (await userManager.IsInRoleAsync(appUser, "Student"))
-            return controller.RedirectToAction("StudentDashboard", "Account");
+            return controller.RedirectToAction("Index", "Issue");
 
         return controller.RedirectToAction("Index", "Home");
     }

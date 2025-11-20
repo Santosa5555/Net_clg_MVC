@@ -1,0 +1,92 @@
+@model CampusIssueReporting.Models.Issue
+@{
+    ViewData["Title"] = "Issue Details";
+    var fileDtos = ViewData["FileDtos"] as List<dynamic>; // controller provided List<FileDto> in ViewData
+}
+
+<div class="mb-3">
+    <a class="btn btn-sm btn-outline-secondary" asp-action="Index">Back to Feed</a>
+    <a class="btn btn-sm btn-secondary" asp-action="MyIssues">My Issues</a>
+</div>
+
+<h2>@Model.Title</h2>
+<p class="text-muted">Reported by <strong>@Model.Reporter?.UserName</strong> on @Model.CreatedAt.ToLocalTime().ToString("g")</p>
+
+<div class="mb-3">
+    <strong>Category:</strong> @Model.Category?.Name ?? "Uncategorized"
+</div>
+
+<div class="mb-3">
+    <strong>Description</strong>
+    <div class="border p-3" style="white-space:pre-wrap;">@Html.Encode(Model.Description)</div>
+</div>
+
+@if (fileDtos != null && fileDtos.Any())
+{
+    <div class="mb-3">
+        <h5>Attachments</h5>
+
+        <div class="row">
+            @foreach (var f in fileDtos)
+            {
+                if (f.IsImage && !string.IsNullOrEmpty((string)f.Url))
+                {
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <img src="@f.Url" alt="@f.FileName" style="max-width:100%; height:auto; object-fit:contain; border:1px solid #eaeaea; padding:6px; background:#fff;" />
+                                <div class="mt-2 small text-muted">@f.FileName</div>
+                                <div class="mt-2">
+                                    <a class="btn btn-sm btn-outline-primary" asp-action="DownloadFile" asp-route-id="@f.Id">Download</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-12 mb-2">
+                        <div>
+                            <a class="btn btn-sm btn-link" asp-action="DownloadFile" asp-route-id="@f.Id">@f.FileName</a>
+                            <span class="text-muted small"> — uploaded @((DateTime)f.UploadedAt).ToLocalTime().ToString("g")</span>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+}
+
+<hr />
+
+<h5>Comments (@(Model.Comments?.Count() ?? 0))</h5>
+
+@if (Model.Comments != null && Model.Comments.Any())
+{
+    <div class="list-group mb-3">
+        @foreach (var cm in Model.Comments.OrderBy(c => c.CreatedAt))
+        {
+            <div class="list-group-item">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <strong>@cm.User?.UserName</strong>
+                        <div class="small text-muted">@cm.CreatedAt.ToLocalTime().ToString("g")</div>
+                    </div>
+                </div>
+                <div class="mt-2">@Html.Encode(cm.Content)</div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="mb-3 text-muted">No comments yet. Be the first to comment.</div>
+}
+
+<form asp-action="AddComment" method="post">
+    <input type="hidden" name="issueId" value="@Model.Id" />
+    <div class="mb-2">
+        <textarea name="content" class="form-control" rows="3" placeholder="Write a comment..." required></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Post Comment</button>
+</form>

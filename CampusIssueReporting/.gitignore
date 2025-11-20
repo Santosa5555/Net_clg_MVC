@@ -19,3 +19,6 @@ appsettings.*.json
 secrets.json
 .env
 .env.*
+
+#
+wwwroot/uploads/

@@ -13,12 +13,9 @@ namespace CampusIssueReporting.Models
         [Required]
         public string Description { get; set; } = string.Empty;
 
-        [Required]
         public IssueStatus Status { get; set; } = IssueStatus.Open;
 
-        [Required]
         public IssuePriority Priority { get; set; } = IssuePriority.Medium;
-        [Required]
         public string ReporterId { get; set; } = null!;
         public ApplicationUser Reporter { get; set; } = null!;
 

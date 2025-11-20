@@ -1,0 +1,23 @@
+@model CampusIssueReporting.Models.Issue
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="d-flex justify-content-between">
+            <h5 class="card-title mb-0">
+                <a asp-action="Details" asp-route-id="@Model.Id">@Model.Title</a>
+            </h5>
+            <small class="text-muted">@Model.CreatedAt.ToLocalTime().ToString("g")</small>
+        </div>
+        <p class="card-text mt-2">
+            @Html.Raw((Model.Description?.Length > 250) ? Html.Encode(Model.Description).Substring(0, 250) + "..." : Html.Encode(Model.Description))
+        </p>
+        <div class="d-flex justify-content-between">
+            <div>
+                <span class="badge bg-secondary">@Model.Category?.Name ?? "Uncategorized"</span>
+                <span class="text-muted ms-2">By @Model.Reporter?.UserName</span>
+            </div>
+            <div>
+                <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@Model.Id">View</a>
+            </div>
+        </div>
+    </div>
+</div>

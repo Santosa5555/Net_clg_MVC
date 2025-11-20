@@ -1,0 +1,219 @@
+@model IEnumerable<CampusIssueReporting.Models.Issue>
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Env
+@{
+    ViewData["Title"] = "Issue Feed";
+    var page = (int?)ViewData["Page"] ?? 1;
+    var pageCount = (int?)ViewData["PageCount"] ?? 1;
+    var total = (int?)ViewData["Total"] ?? 0;
+}
+
+<h2>Issue Feed (@total)</h2>
+
+<p class="text-muted">See what other students have reported. Click an item to view details, images, and comments.</p>
+
+<div class="row">
+    <div class="col-12">
+        @foreach (var issue in Model)
+        {
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <h5 class="card-title mb-0">
+                            <a asp-action="Details" asp-route-id="@issue.Id">@issue.Title</a>
+                        </h5>
+                        <small class="text-muted">@issue.CreatedAt.ToLocalTime().ToString("g")</small>
+                    </div>
+
+                    <p class="card-text mt-2">
+                        @if (!string.IsNullOrWhiteSpace(issue.Description))
+                        {
+                            @Html.Raw((issue.Description.Length > 300) ? Html.Encode(issue.Description).Substring(0, 300) +
+                            "..." : Html.Encode(issue.Description))
+                                        }
+                    </p>
+
+                    @if (issue.Files != null && issue.Files.Any())
+                    {
+                        var imageFiles = issue.Files.Where(f =>
+                        {
+                            var ext = System.IO.Path.GetExtension(f.FilePath ?? f.FileName ?? string.Empty).ToLowerInvariant();
+                            return new[] { ".jpg", ".jpeg", ".png", ".gif" }.Contains(ext);
+                        }).ToList();
+
+                        if (imageFiles.Any())
+                        {
+                            @* Build a list of resolved image URLs for this issue *@
+                            var urls = imageFiles.Select(f =>
+                            {
+                                if (!string.IsNullOrEmpty(f.FileUrl))
+                                {
+                                    var u = f.FileUrl;
+                                    if (!u.StartsWith("~") && !u.StartsWith("/")) u = "/" + u;
+                                    return Url.Content(u);
+                                }
+                                var webPath = f.FilePath ?? string.Empty;
+                                if (!string.IsNullOrEmpty(webPath) && webPath.StartsWith(Env.WebRootPath))
+                                {
+                                    webPath = webPath.Substring(Env.WebRootPath.Length);
+                                }
+                                webPath = webPath.Replace("\\", "/");
+                                if (!webPath.StartsWith("/")) webPath = "/" + webPath;
+                                return Url.Content("~" + webPath);
+                            }).ToList();
+
+                            <div class="mt-2">
+                                <div class="d-flex flex-wrap">
+                                    @for (int i = 0; i < urls.Count && i < 4; i++)
+                                    {
+                                        var img = urls[i];
+                                        <a href="#" class="issue-thumb me-2 mb-2"
+                                            data-images='@System.Text.Json.JsonSerializer.Serialize(urls)' data-start="@i"
+                                            title="View image">
+                                            <img src="@img" alt="@issue.Title image @i" class="img-thumbnail"
+                                                style="width:150px;height:100px;object-fit:cover;" loading="lazy" />
+                                        </a>
+                                    }
+
+                                    @if (urls.Count > 4)
+                                    {
+                                        <div class="d-flex align-items-center ms-2">
+                                            <a href="#" class="issue-thumb more-thumb badge bg-dark text-white p-3"
+                                                data-images='@System.Text.Json.JsonSerializer.Serialize(urls)' data-start="4">
+                                                +@((urls.Count) - 4)
+                                            </a>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="badge bg-secondary">@issue.Category?.Name</span>
+                            <span class="text-muted ms-2">Reported By @issue.Reporter?.UserName</span>
+                        </div>
+
+                    </div>
+                </div>
+                <div>
+                    <h5>Comments (@(issue.Comments?.Count() ?? 0))</h5>
+                    @if (issue.Comments != null && issue.Comments.Any())
+                    {
+                        <div class="list-group mb-3">
+                            @foreach (var cm in issue.Comments.OrderBy(c => c.CreatedAt))
+                            {
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <strong>@cm.User?.UserName</strong>
+                                            <div class="small text-muted">@cm.CreatedAt.ToLocalTime().ToString("g")</div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">@Html.Encode(cm.Content)</div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="mb-3 text-muted text-sm">No comments yet. Be the first to comment.</div>
+                    }
+                </div>
+                <form asp-action="AddComment" method="post">
+                    <input type="hidden" name="issueId" value="@issue.Id" />
+                    <div class="mb-2">
+                        <textarea name="content" class="form-control" rows="3" placeholder="Write a comment..."
+                        required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Post Comment</button>
+                </form>
+            </div>
+        }
+    </div>
+</div>
+
+<nav>
+    <ul class="pagination">
+        @for (int i = 1; i <= pageCount; i++)
+        {
+            <li class="page-item @(i == page ? "active" : "")">
+                <a class="page-link" asp-action="Index" asp-route-page="@i">@i</a>
+            </li>
+        }
+    </ul>
+</nav>
+
+@* Modal gallery (single reusable modal populated dynamically) *@
+<div class="modal fade" id="issueImageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content bg-dark">
+            <div class="modal-header border-0">
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div id="issueImageCarousel" class="carousel slide" data-bs-ride="false">
+                    <div class="carousel-inner" id="issueImageCarouselInner">
+                        @* populated dynamically *@
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#issueImageCarousel"
+                        data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#issueImageCarousel"
+                        data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            function populateAndShow(images, startIndex) {
+                var inner = document.getElementById('issueImageCarouselInner');
+                inner.innerHTML = '';
+                for (var i = 0; i < images.length; i++) {
+                    var div = document.createElement('div');
+                    div.className = 'carousel-item' + (i === startIndex ? ' active' : '');
+                    var img = document.createElement('img');
+                    img.src = images[i];
+                    img.className = 'd-block w-100';
+                    img.style.maxHeight = '75vh';
+                    img.style.objectFit = 'contain';
+                    img.alt = 'Issue image ' + (i + 1);
+                    div.appendChild(img);
+                    inner.appendChild(div);
+                }
+                var carouselEl = document.getElementById('issueImageCarousel');
+                var carousel = bootstrap.Carousel.getInstance(carouselEl);
+                if (carousel) carousel.dispose();
+                carousel = new bootstrap.Carousel(carouselEl, { interval: false, wrap: false });
+                // move to selected slide
+                carousel.to(startIndex);
+                var modalEl = document.getElementById('issueImageModal');
+                var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                modal.show();
+            }
+
+            document.addEventListener('click', function (ev) {
+                var a = ev.target.closest ? ev.target.closest('.issue-thumb') : null;
+                if (!a) return;
+                ev.preventDefault();
+                try {
+                    var imagesJson = a.getAttribute('data-images');
+                    var start = parseInt(a.getAttribute('data-start') || '0');
+                    var images = JSON.parse(imagesJson || '[]');
+                    if (images.length) populateAndShow(images, Math.min(start, images.length - 1));
+                } catch (e) {
+                    console.error('Failed to open image gallery', e);
+                }
+            });
+        })();
+    </script>
+}

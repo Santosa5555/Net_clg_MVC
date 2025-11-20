@@ -1,25 +1,31 @@
-html {
-  font-size: 14px;
+/* Custom font loading - Using system fonts (fallback) */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  margin-bottom: 60px;
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+/* Example: Using a custom font (uncomment if you add fonts to wwwroot/fonts/) */
+/* 
+@font-face {
+  font-family: "Poppins";
+  src: url("/fonts/poppins-regular.woff2") format("woff2"),
+       url("/fonts/poppins-regular.woff") format("woff");
+  font-weight: 400;
+  font-display: swap;
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+@font-face {
+  font-family: "Poppins";
+  src: url("/fonts/poppins-bold.woff2") format("woff2"),
+       url("/fonts/poppins-bold.woff") format("woff");
+  font-weight: 700;
+  font-display: swap;
 }
 
 body {
-  margin-bottom: 60px;
+  font-family: "Poppins", sans-serif;
 }
+*/
 
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
   color: var(--bs-secondary-color);
@@ -28,4 +34,58 @@ body {
 
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
+}
+
+/* Custom font loading */
+@font-face {
+  font-family: "InterVar";
+  src: url("/fonts/Inter-Variable.woff2") format("woff2"),
+       url("/fonts/Inter-Variable.woff") format("woff");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+/* Custom button styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn i {
+  font-size: 1.1em;
+}
+
+/* Table enhancements */
+.table thead th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  border-bottom: 2px solid #dee2e6;
+}
+
+/* ============================================
+   FONT AWESOME ICON UTILITIES
+   ============================================ */
+
+/* Icon sizing */
+.icon-sm { font-size: 1rem; }
+.icon-md { font-size: 1.5rem; }
+.icon-lg { font-size: 2rem; }
+.icon-xl { font-size: 3rem; }
+
+/* Icon colors */
+.icon-primary { color: #0d6efd; }
+.icon-success { color: #198754; }
+.icon-danger { color: #dc3545; }
+.icon-warning { color: #ffc107; color: #000; }
+.icon-info { color: #0dcaf0; }
+
+/* Animated spinning icon (for loaders) */
+.icon-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }

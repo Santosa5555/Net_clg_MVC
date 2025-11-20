@@ -1,0 +1,40 @@
+@model IEnumerable<CampusIssueReporting.Models.Issue>
+@{
+    ViewData["Title"] = "My Issues";
+}
+
+<h2>My Issues</h2>
+
+@if (TempData["SuccessMessage"] != null) {
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+<div class="mb-3">
+    <a class="btn btn-primary" asp-action="Create">Report New Issue</a>
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th style="width:220px">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var i in Model)
+    {
+        <tr>
+            <td><a asp-action="Details" asp-route-id="@i.Id">@i.Title</a></td>
+            <td>@i.Category?.Name</td>
+            <td>@i.Status</td>
+            <td>@i.CreatedAt.ToLocalTime().ToString("g")</td>
+            <td>
+                <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@i.Id">Delete</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

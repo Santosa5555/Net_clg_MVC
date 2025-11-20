@@ -134,7 +134,7 @@ public class AccountController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> StudentDashboard()
+    public IActionResult StudentDashboard()
     {
         // load user-specific data via IssueService etc.
         return View();
