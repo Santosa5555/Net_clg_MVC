@@ -23,8 +23,9 @@ public class HomeController : Controller
             return await RedirectHelper.RedirectToRoleDashboardAsync(_userManager, User, this);
         }
 
-        // public landing page
-        return View();
+        // For non-authenticated users, show the issue feed
+        // Redirect to Issue/Index which now allows anonymous access
+        return RedirectToAction("Index", "Issue");
     }
 
     public IActionResult About()

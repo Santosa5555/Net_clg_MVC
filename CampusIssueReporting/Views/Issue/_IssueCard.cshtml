@@ -1,0 +1,133 @@
+@model IEnumerable<CampusIssueReporting.Models.Issue>
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Env
+@inject Microsoft.AspNetCore.Identity.SignInManager<CampusIssueReporting.Models.ApplicationUser> SignInManager
+
+@foreach (var issue in Model)
+{
+    <div class="card mb-3 issue-card-clean">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div class="flex-grow-1">
+                    <h6 class="card-title mb-1">
+                        <a asp-action="Details" asp-route-id="@issue.Id" class="text-decoration-none">@issue.Title</a>
+                    </h6>
+                    <div class="d-flex gap-2 align-items-center flex-wrap">
+                        <span class="badge priority-badge priority-badge-@issue.Priority.ToString().ToLower()">
+                            @issue.Priority
+                        </span>
+                        <span class="badge bg-secondary">@issue.Category?.Name</span>
+                        <small class="text-muted">@issue.Reporter?.UserName</small>
+                        <small class="text-muted">•</small>
+                        <small class="text-muted">@issue.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</small>
+                    </div>
+                </div>
+            </div>
+
+            <p class="card-text text-muted small mb-2">
+                @if (!string.IsNullOrWhiteSpace(issue.Description))
+                {
+                    var desc = Html.Encode(issue.Description);
+                    @Html.Raw(desc.Length > 150 ? desc.Substring(0, 150) + "..." : desc)
+                }
+            </p>
+
+            @if (issue.Files != null && issue.Files.Any())
+            {
+                var imageFiles = issue.Files.Where(f =>
+                {
+                    var ext = System.IO.Path.GetExtension(f.FilePath ?? f.FileName ?? string.Empty).ToLowerInvariant();
+                    return new[] { ".jpg", ".jpeg", ".png", ".gif" }.Contains(ext);
+                }).ToList();
+
+                if (imageFiles.Any())
+                {
+                    var urls = imageFiles.Select(f =>
+                    {
+                        if (!string.IsNullOrEmpty(f.FileUrl))
+                        {
+                            var u = f.FileUrl;
+                            if (!u.StartsWith("~") && !u.StartsWith("/")) u = "/" + u;
+                            return Url.Content(u);
+                        }
+                        var webPath = f.FilePath ?? string.Empty;
+                        if (!string.IsNullOrEmpty(webPath) && webPath.StartsWith(Env.WebRootPath))
+                        {
+                            webPath = webPath.Substring(Env.WebRootPath.Length);
+                        }
+                        webPath = webPath.Replace("\\", "/");
+                        if (!webPath.StartsWith("/")) webPath = "/" + webPath;
+                        return Url.Content("~" + webPath);
+                    }).ToList();
+
+                    <div class="mb-2">
+                        <div class="d-flex flex-wrap gap-2">
+                            @for (int i = 0; i < urls.Count && i < 3; i++)
+                            {
+                                <a href="#" class="issue-thumb" data-images='@System.Text.Json.JsonSerializer.Serialize(urls)' data-start="@i">
+                                    <img src="@urls[i]" alt="Image @i" class="img-thumbnail" style="width:80px;height:60px;object-fit:cover;" loading="lazy" />
+                                </a>
+                            }
+                            @if (urls.Count > 3)
+                            {
+                                <a href="#" class="issue-thumb badge bg-dark text-white d-flex align-items-center justify-content-center" style="width:80px;height:60px;" data-images='@System.Text.Json.JsonSerializer.Serialize(urls)' data-start="3">
+                                    +@(urls.Count - 3)
+                                </a>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+
+            <div class="comments-section" data-issue-id="@issue.Id">
+                <button class="btn btn-sm btn-link text-muted p-0 toggle-comments" type="button">
+                    <i class="fas fa-comments me-1"></i>Comments (@(issue.Comments?.Count() ?? 0))
+                    <i class="fas fa-chevron-down ms-1"></i>
+                </button>
+                <div class="comments-content mt-2" style="display: none;">
+                    @if (issue.Comments != null && issue.Comments.Any())
+                    {
+                        <div class="small">
+                            @foreach (var cm in issue.Comments.OrderBy(c => c.CreatedAt).Take(3))
+                            {
+                                <div class="mb-2 pb-2 border-bottom">
+                                    <strong class="small">@cm.User?.UserName</strong>
+                                    <span class="text-muted small">@cm.CreatedAt.ToLocalTime().ToString("MMM d")</span>
+                                    <div class="mt-1">@Html.Encode(cm.Content)</div>
+                                </div>
+                            }
+                            @if (issue.Comments.Count() > 3)
+                            {
+                                <a asp-action="Details" asp-route-id="@issue.Id" class="small">View all @issue.Comments.Count() comments</a>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-muted small">
+                            @if (SignInManager.IsSignedIn(User))
+                            {
+                                <text>No comments yet.</text>
+                            }
+                            else
+                            {
+                                <text>No comments. <a asp-controller="Account" asp-action="Login">Login</a> to comment.</text>
+                            }
+                        </div>
+                    }
+
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <form asp-action="AddComment" method="post" class="mt-2">
+                            <input type="hidden" name="issueId" value="@issue.Id" />
+                            <div class="input-group input-group-sm">
+                                <textarea name="content" class="form-control form-control-sm" rows="2" placeholder="Write a comment..." required></textarea>
+                                <button type="submit" class="btn btn-primary btn-sm">Post</button>
+                            </div>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+

@@ -29,32 +29,60 @@ namespace CampusIssueReporting.Controllers
         }
 
         // GET: /Issue
-        // Public homepage: show recent issues (students can view others)
-        public async Task<IActionResult> Index(int page = 1, int pageSize = 20)
+        // Public homepage: show recent issues (anyone can view, authenticated users can comment)
+        [AllowAnonymous]
+        public async Task<IActionResult> Index(string sortBy = "latest")
         {
-            _logger.LogInformation($"IssueController.Index called - Page: {page}, PageSize: {pageSize}");
-
             var query = _context.Issues
                 .Include(i => i.Reporter)
                 .Include(i => i.Category)
                 .Include(i => i.Files)
                 .Include(i => i.Comments)
-                .OrderByDescending(i => i.CreatedAt)
                 .AsQueryable();
 
-            var total = await query.CountAsync();
-            var pageCount = (int)Math.Ceiling(total / (double)pageSize);
+            // Sort by priority first (High, Medium, Low), then by sort option
+            query = sortBy switch
+            {
+                "latest" => query.OrderByDescending(i => i.Priority).ThenByDescending(i => i.CreatedAt),
+                "oldest" => query.OrderByDescending(i => i.Priority).ThenBy(i => i.CreatedAt),
+                _ => query.OrderByDescending(i => i.Priority).ThenByDescending(i => i.CreatedAt)
+            };
 
-            var issues = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+            // Load initial batch for infinite scroll
+            var issues = await query.Take(10).ToListAsync();
 
-            ViewData["Page"] = page;
-            ViewData["PageCount"] = pageCount;
-            ViewData["Total"] = total;
-
+            ViewData["SortBy"] = sortBy;
+            ViewData["TotalCount"] = await query.CountAsync();
             return View(issues);
+        }
+
+        // API endpoint for loading more issues (infinite scroll)
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<IActionResult> LoadMore(int skip = 0, int take = 10, string sortBy = "latest")
+        {
+            var query = _context.Issues
+                .Include(i => i.Reporter)
+                .Include(i => i.Category)
+                .Include(i => i.Files)
+                .Include(i => i.Comments)
+                .AsQueryable();
+
+            query = sortBy switch
+            {
+                "latest" => query.OrderByDescending(i => i.Priority).ThenByDescending(i => i.CreatedAt),
+                "oldest" => query.OrderByDescending(i => i.Priority).ThenBy(i => i.CreatedAt),
+                _ => query.OrderByDescending(i => i.Priority).ThenByDescending(i => i.CreatedAt)
+            };
+
+            var issues = await query.Skip(skip).Take(take).ToListAsync();
+            
+            if (!issues.Any())
+            {
+                return Content("<div class='text-center text-muted py-4'>No more issues to load.</div>");
+            }
+            
+            return PartialView("_IssueCard", issues);
         }
 
         // GET: /Issue/MyIssues
@@ -170,6 +198,8 @@ namespace CampusIssueReporting.Controllers
         }
 
         // GET: /Issue/Details/5
+        // Allow anonymous viewing of issue details
+        [AllowAnonymous]
         public async Task<IActionResult> Details(int id)
         {
             _logger.LogInformation($"IssueController.Details called - IssueId: {id}");

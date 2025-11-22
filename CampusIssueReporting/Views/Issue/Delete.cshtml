@@ -1,0 +1,48 @@
+@model CampusIssueReporting.Models.Issue
+@{
+    ViewData["Title"] = "Delete Issue";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Delete Issue</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Are you sure you want to delete this issue?</strong> This action cannot be undone.
+                </div>
+
+                <div class="mb-3">
+                    <h6>@Model.Title</h6>
+                    <p class="text-muted small mb-2">
+                        <span class="badge bg-secondary">@Model.Category?.Name</span>
+                        <span class="ms-2">Created: @Model.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</span>
+                    </p>
+                    <p class="text-muted">@Html.Raw(Html.Encode(Model.Description).Length > 200 ? Html.Encode(Model.Description).Substring(0, 200) + "..." : Html.Encode(Model.Description))</p>
+                </div>
+
+                @if (Model.Files != null && Model.Files.Any())
+                {
+                    <div class="mb-3">
+                        <small class="text-muted">This issue has @Model.Files.Count() file(s) that will also be deleted.</small>
+                    </div>
+                }
+
+                <form asp-action="Delete" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Yes, Delete Issue
+                    </button>
+                </form>
+                <a asp-action="MyIssues" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+

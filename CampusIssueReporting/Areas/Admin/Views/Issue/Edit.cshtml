@@ -1,0 +1,152 @@
+@model CampusIssueReporting.Models.Issue
+@using CampusIssueReporting.Models
+@{
+    ViewData["Title"] = "Edit Issue (Admin)";
+    var adminUsers = ViewData["AdminUsers"] as List<ApplicationUser> ?? new List<ApplicationUser>();
+    var priorities = ViewData["Priorities"] as List<IssuePriority> ?? new List<IssuePriority>();
+    var statuses = ViewData["Statuses"] as List<IssueStatus> ?? new List<IssueStatus>();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Edit Issue #@Model.Id</h2>
+    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Back to Details
+    </a>
+</div>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card">
+    <div class="card-header bg-primary-dark text-white">
+        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Issue Information</h5>
+    </div>
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Title</label>
+                <p class="form-control-plaintext">@Model.Title</p>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Reporter</label>
+                <p class="form-control-plaintext">@Model.Reporter?.UserName (@Model.Reporter?.Email)</p>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Category</label>
+                <p class="form-control-plaintext">@Model.Category?.Name ?? "Uncategorized"</p>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Created</label>
+                <p class="form-control-plaintext">@Model.CreatedAt.ToLocalTime().ToString("g")</p>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label fw-bold">Description</label>
+            <div class="border rounded p-3 bg-light" style="white-space: pre-wrap;">@Model.Description</div>
+        </div>
+    </div>
+</div>
+
+<form asp-action="Edit" method="post" class="mt-4">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" value="@Model.Id" />
+
+    <div class="card">
+        <div class="card-header bg-accent text-white">
+            <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Update Issue Status & Priority</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="status" class="form-label fw-bold">
+                        <i class="fas fa-flag me-1"></i>Status
+                    </label>
+                    <select id="status" name="status" class="form-select form-select-lg" required>
+                        @foreach (var status in statuses)
+                        {
+                            <option value="@status" selected="@(Model.Status == status ? "selected" : null)">
+                                @status
+                            </option>
+                        }
+                    </select>
+                    <small class="form-text text-muted">Current status: <strong>@Model.Status</strong></small>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="priority" class="form-label fw-bold">
+                        <i class="fas fa-exclamation-triangle me-1"></i>Priority
+                    </label>
+                    <select id="priority" name="priority" class="form-select form-select-lg" required>
+                        @foreach (var priority in priorities)
+                        {
+                            <option value="@priority" selected="@(Model.Priority == priority ? "selected" : null)">
+                                @priority
+                            </option>
+                        }
+                    </select>
+                    <small class="form-text text-muted">Current priority: <strong>@Model.Priority</strong></small>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="assignedAdminId" class="form-label fw-bold">
+                    <i class="fas fa-user-shield me-1"></i>Assign Admin
+                </label>
+                <select id="assignedAdminId" name="assignedAdminId" class="form-select">
+                    <option value="">-- Unassign --</option>
+                    @foreach (var admin in adminUsers)
+                    {
+                        <option value="@admin.Id" selected="@(Model.AssignedAdminId == admin.Id ? "selected" : null)">
+                            @admin.UserName (@admin.Email)
+                        </option>
+                    }
+                </select>
+                <small class="form-text text-muted">
+                    Current assigned admin: <strong>@(Model.AssignedAdmin?.UserName ?? "Unassigned")</strong>
+                </small>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-save me-2"></i>Update Issue
+                </button>
+                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary btn-lg">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </a>
+            </div>
+        </div>
+    </div>
+</form>
+
+@if (Model.Files != null && Model.Files.Any())
+{
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-paperclip me-2"></i>Attachments (@Model.Files.Count)</h5>
+        </div>
+        <div class="card-body">
+            <div class="d-flex flex-wrap gap-3">
+                @foreach (var f in Model.Files)
+                {
+                    <div class="border rounded p-2">
+                        @if (!string.IsNullOrEmpty(f.FileUrl) && (f.FileUrl.EndsWith(".jpg") || f.FileUrl.EndsWith(".png") || f.FileUrl.EndsWith(".jpeg") || f.FileUrl.EndsWith(".gif")))
+                        {
+                            <img src="@f.FileUrl" alt="@f.FileName" style="max-width:150px;max-height:100px;object-fit:cover;border-radius:4px;" class="mb-2" />
+                        }
+                        <div class="small">
+                            <i class="fas fa-file me-1"></i>@f.FileName
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+

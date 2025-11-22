@@ -1,4 +1,5 @@
 @model CampusIssueReporting.Models.Issue
+@inject Microsoft.AspNetCore.Identity.SignInManager<CampusIssueReporting.Models.ApplicationUser> SignInManager
 @{
     ViewData["Title"] = "Issue Details";
     var fileDtos = ViewData["FileDtos"] as List<dynamic>; // controller provided List<FileDto> in ViewData
@@ -6,7 +7,10 @@
 
 <div class="mb-3">
     <a class="btn btn-sm btn-outline-secondary" asp-action="Index">Back to Feed</a>
-    <a class="btn btn-sm btn-secondary" asp-action="MyIssues">My Issues</a>
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <a class="btn btn-sm btn-secondary" asp-action="MyIssues">My Issues</a>
+    }
 </div>
 
 <h2>@Model.Title</h2>
@@ -80,13 +84,31 @@
 }
 else
 {
-    <div class="mb-3 text-muted">No comments yet. Be the first to comment.</div>
+    <div class="mb-3 text-muted">
+        @if (SignInManager.IsSignedIn(User))
+        {
+            <text>No comments yet. Be the first to comment.</text>
+        }
+        else
+        {
+            <text>No comments yet. <a asp-controller="Account" asp-action="Login">Login</a> to comment.</text>
+        }
+    </div>
 }
 
-<form asp-action="AddComment" method="post">
-    <input type="hidden" name="issueId" value="@Model.Id" />
-    <div class="mb-2">
-        <textarea name="content" class="form-control" rows="3" placeholder="Write a comment..." required></textarea>
+@if (SignInManager.IsSignedIn(User))
+{
+    <form asp-action="AddComment" method="post">
+        <input type="hidden" name="issueId" value="@Model.Id" />
+        <div class="mb-2">
+            <textarea name="content" class="form-control" rows="3" placeholder="Write a comment..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Post Comment</button>
+    </form>
+}
+else
+{
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> Please <a asp-controller="Account" asp-action="Login" class="alert-link">login</a> to post a comment.
     </div>
-    <button type="submit" class="btn btn-primary">Post Comment</button>
-</form>
+}

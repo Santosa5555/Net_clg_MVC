@@ -8,6 +8,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>@ViewData["Title"] - CampusIssueReporting</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="~/favicon.svg" />
+  <link rel="icon" type="image/png" href="~/favicon.png" />
+  <link rel="apple-touch-icon" href="~/favicon.png" />
 
   <!-- Bootstrap CSS (LibMan) -->
   <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" />
@@ -15,63 +20,132 @@
   <!-- Font Awesome (LibMan) -->
   <link rel="stylesheet" href="~/lib/font-awesome/css/all.min.css" />
 
+  <!-- Theme CSS (Color Palette) -->
+  <link rel="stylesheet" href="~/css/theme.css" />
+  <!-- Components CSS (Reusable UI Components) -->
+  <link rel="stylesheet" href="~/css/components.css" />
   <!-- Site CSS -->
   <link rel="stylesheet" href="~/css/site.css" />
 </head>
-<body>
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+<body class="d-flex flex-column">
+  <nav class="navbar navbar-expand-lg navbar-primary shadow-sm">
     <div class="container">
-      <a class="navbar-brand" asp-controller="Home" asp-action="Index">CampusApp</a>
+      <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">
+        <i class="fas fa-university me-2"></i>CampusApp
+      </a>
 
-      <div class="collapse navbar-collapse">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" 
+              aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarContent">
         <ul class="navbar-nav me-auto">
-          @* <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Home</a></li> *@
           @if (SignInManager.IsSignedIn(User) && User.IsInRole("Student"))
           {
-              <li class="nav-item"><a class="nav-link" asp-controller="Issue" asp-action="MyIssues">My Issues</a></li>
-              <li class="nav-item"><a class="nav-link" asp-controller="Issue" asp-action="Create">create new issue</a></li>
-
+              <li class="nav-item">
+                <a class="nav-link" asp-controller="Issue" asp-action="Index">
+                  <i class="fas fa-list me-1"></i>Issue Feed
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" asp-controller="Issue" asp-action="MyIssues">
+                  <i class="fas fa-folder me-1"></i>My Issues
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" asp-controller="Issue" asp-action="Create">
+                  <i class="fas fa-plus-circle me-1"></i>New Issue
+                </a>
+              </li>
+          }
+          else if (!SignInManager.IsSignedIn(User))
+          {
+              <li class="nav-item">
+                <a class="nav-link" asp-controller="Issue" asp-action="Index">
+                  <i class="fas fa-list me-1"></i>Browse Issues
+                </a>
+              </li>
           }
           @if (User.IsInRole("Admin"))
           {
-              <li class="nav-item"><a class="nav-link" href="/Admin/Home/AdminDashboard">Admin</a></li>
+              <li class="nav-item">
+                <a class="nav-link" href="/Admin/Account/AdminDashboard">
+                  <i class="fas fa-shield-alt me-1"></i>Admin Dashboard
+                </a>
+              </li>
           }
         </ul>
 
         <ul class="navbar-nav">
           @if (SignInManager.IsSignedIn(User))
           {
-              <li class="nav-item">
-                <a class="nav-link"> @UserManager.GetUserName(User)</a>
-              </li>
-              <li class="nav-item">
-                <form class="form-inline" asp-controller="Account" asp-action="Logout" method="post">
-                  <button type="submit" class="btn btn-link nav-link">Logout</button>
-                </form>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" 
+                   role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="fas fa-user-circle me-2"></i>
+                  <span>@UserManager.GetUserName(User)</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                  <li>
+                    <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                      <button type="submit" class="dropdown-item">
+                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                      </button>
+                    </form>
+                  </li>
+                </ul>
               </li>
           }
           else
           {
-              <li class="nav-item"><a class="nav-link" asp-controller="Account" asp-action="Login">Student Login</a></li>
+              <li class="nav-item">
+                <a class="nav-link btn btn-accent text-white px-3 ms-2 rounded-pill" 
+                   asp-controller="Account" asp-action="Login">
+                  <i class="fas fa-sign-in-alt me-1"></i>Login
+                </a>
+              </li>
           }
         </ul>
       </div>
     </div>
   </nav>
 
-  <div class="container mt-4">
-    @if (TempData["Success"] != null) {
-      <div class="alert alert-success">@TempData["Success"]</div>
-    }
-    @if (TempData["Error"] != null) {
-      <div class="alert alert-danger">@TempData["Error"]</div>
-    }
+  <main class="flex-grow-1">
+    <div class="container mt-4 mb-4">
+      @if (TempData["Success"] != null) {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+          <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      }
+      @if (TempData["Error"] != null) {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      }
 
-    @RenderBody()
-  </div>
+      @RenderBody()
+    </div>
+  </main>
 
-  <footer class="border-top text-muted mt-4">
-    <div class="container py-3">© @DateTime.UtcNow.Year CampusIssueReporting</div>
+  <footer class="footer-sticky bg-primary-dark text-white mt-auto">
+    <div class="container py-4">
+      <div class="row align-items-center">
+        <div class="col-md-6 mb-3 mb-md-0">
+          <h6 class="mb-2 fw-bold">
+            <i class="fas fa-university me-2"></i>CampusApp
+          </h6>
+          <p class="text-white-50 small mb-0">Campus Issue Reporting System</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <p class="text-white-50 small mb-0">
+            © @DateTime.UtcNow.Year CampusIssueReporting. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </div>
   </footer>
 
   <!-- jQuery (LibMan) -->

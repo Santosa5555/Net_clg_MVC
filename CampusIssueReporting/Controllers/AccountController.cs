@@ -54,11 +54,11 @@ public class AccountController : Controller
             return View(model);
         }
 
-        var result = await _signInManager.PasswordSignInAsync(user.UserName ?? model.Email, model.Password, false, lockoutOnFailure: false);
+        var result = await _signInManager.PasswordSignInAsync(user.UserName ?? model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
         if (result.Succeeded)
         {
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl)) return Redirect(returnUrl);
-            return RedirectToAction("StudentDashboard", "Account");
+            return RedirectToAction("Index", "Issue");
         }
 
         ModelState.AddModelError("", "Invalid login attempt.");
@@ -113,7 +113,7 @@ public class AccountController : Controller
             await _signInManager.SignInAsync(user, isPersistent: false);
             _logger.LogInformation("Register: User {Email} signed in successfully.", model.Email);
 
-            return RedirectToAction("StudentDashboard", "Account");
+            return RedirectToAction("Index", "Issue");
         }
 
         _logger.LogError("Register: Failed to create user {Email}. Errors: {@Errors}",

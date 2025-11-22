@@ -1,0 +1,109 @@
+@model IEnumerable<CampusIssueReporting.Models.Issue>
+@using CampusIssueReporting.Models
+@{
+    ViewData["Title"] = "Issues (Admin)";
+    var page = (int?)ViewData["Page"] ?? 1;
+    var pageCount = (int?)ViewData["PageCount"] ?? 1;
+    var categories = ViewData["Categories"] as List<IssueCategory> ?? new List<IssueCategory>();
+    var selectedCategory = ViewData["SelectedCategory"] as int?;
+    var selectedStatus = ViewData["SelectedStatus"] as IssueStatus?;
+}
+
+<h2>All Issues</h2>
+
+@* <form method="get" class="row g-2 mb-3"> 
+    <div class="col-auto">
+        <select name="categoryId" class="form-select form-select-sm">
+            <option value="">All categories</option>
+            @foreach (var c in categories)
+            {
+                <option value="@c.Id" 2>@c.Name</option>
+            }
+        </select>
+    <div class="col-auto">
+    <select name="status" class="form-select form-select-sm">
+        <option value="">All statuses</option>
+        @foreach (IssueStatus s in Enum.GetValues(typeof(IssueStatus)))
+        {
+            <option value="@( (int)s )" selected="@(selectedStatus.HasValue && selectedStatus.Value == s ? "selected" : null)">
+                @s
+            </option>
+        }
+    </select>
+</div>
+
+    <div class="col-auto">
+        <button class="btn btn-sm btn-primary">Filter</button>
+    </div>
+</form> *@
+
+@if(TempData["SuccessMessage"] != null) { <div class="alert alert-success">@TempData["SuccessMessage"]</div> }
+@if(TempData["ErrorMessage"] != null) { <div class="alert alert-danger">@TempData["ErrorMessage"]</div> }
+
+<table class="table table-striped table-sm">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Title</th>
+            <th>Reporter</th>
+            <th>Category</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>Assigned Admin</th>
+            <th>Files</th>
+            <th>Comments</th>
+            <th>Created</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var i in Model)
+        {
+            <tr>
+                <td>@i.Id</td>
+                <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@i.Title</td>
+                <td>@i.Reporter?.UserName</td>
+                <td>@i.Category?.Name</td>
+                <td>
+                    <span class="priority-badge priority-badge-@i.Priority.ToString().ToLower()">
+                        @i.Priority
+                    </span>
+                </td>
+                <td>
+                    @{
+                        var statusClass = i.Status switch
+                        {
+                            IssueStatus.Open => "open",
+                            IssueStatus.InProgress => "in-progress",
+                            IssueStatus.Resolved => "resolved",
+                            IssueStatus.Closed => "closed",
+                            _ => "open"
+                        };
+                    }
+                    <span class="status-badge status-badge-@statusClass">
+                        @i.Status
+                    </span>
+                </td>
+                <td>@i.AssignedAdmin?.UserName</td>
+                <td>@(i.Files?.Count() ?? 0)</td>
+                <td>@(i.Comments?.Count() ?? 0)</td>
+                <td>@i.CreatedAt.ToLocalTime().ToString("g")</td>
+                <td>
+                    <a class="btn btn-sm btn-info" asp-action="Details" asp-route-id="@i.Id">Details</a>
+                    <a class="btn btn-sm btn-secondary" asp-action="Edit" asp-route-id="@i.Id">Update</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<nav>
+    <ul class="pagination">
+        @for (int p = 1; p <= pageCount; p++)
+        {
+            <li class="page-item @(p == page ? "active" : "")">
+                <a class="page-link" asp-action="Index" asp-route-page="@p">@p</a>
+            </li>
+        }
+    </ul>
+</nav>

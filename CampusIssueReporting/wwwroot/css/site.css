@@ -1,7 +1,14 @@
 /* Custom font loading - Using system fonts (fallback) */
+html {
+  height: 100%;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  margin-bottom: 60px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
 }
 
 /* Example: Using a custom font (uncomment if you add fonts to wwwroot/fonts/) */
